@@ -32,6 +32,7 @@
             {{ t('nav.reports') }}
           </router-link>
         </nav>
+        <ThemeToggle />
         <LanguageSwitcher />
         <ProfileMenu
           @show-profile-details="showProfileDetails = true"
@@ -70,6 +71,7 @@ import ProfileMenu from './components/ProfileMenu.vue'
 import ProfileDetailsModal from './components/ProfileDetailsModal.vue'
 import TasksModal from './components/TasksModal.vue'
 import LanguageSwitcher from './components/LanguageSwitcher.vue'
+import ThemeToggle from './components/ThemeToggle.vue'
 
 export default {
   name: 'App',
@@ -78,7 +80,8 @@ export default {
     ProfileMenu,
     ProfileDetailsModal,
     TasksModal,
-    LanguageSwitcher
+    LanguageSwitcher,
+    ThemeToggle
   },
   setup() {
     const { currentUser } = useAuth()
@@ -168,6 +171,100 @@ export default {
 </script>
 
 <style>
+/* Theme tokens: components reference these instead of literal colors so the dark theme only overrides values here.
+   Vivid accent/status hues (blue, green, red, amber) stay literal because they read well on both themes. */
+:root {
+  color-scheme: light;
+  --bg: #f8fafc;
+  --surface: #ffffff;
+  --surface-muted: #f1f5f9;
+  --bg-subtle: #f8fafc;
+  --border: #e2e8f0;
+  --border-strong: #cbd5e1;
+  --text: #0f172a;
+  --text-body: #1e293b;
+  --text-strong: #334155;
+  --text-secondary: #475569;
+  --text-muted: #64748b;
+  --text-faint: #94a3b8;
+  --inverse-bg: #0f172a;
+  --success-bg: #d1fae5;
+  --success-bg-subtle: #ecfdf5;
+  --success-border: #a7f3d0;
+  --success-text: #065f46;
+  --danger-bg: #fee2e2;
+  --danger-bg-subtle: #fef2f2;
+  --danger-border: #fecaca;
+  --danger-text: #991b1b;
+  --warning-bg: #fed7aa;
+  --warning-bg-subtle: #fffbeb;
+  --warning-border: #fde68a;
+  --warning-text: #92400e;
+  --info-bg: #dbeafe;
+  --info-bg-subtle: #eff6ff;
+  --info-border: #bfdbfe;
+  --info-text: #1e40af;
+  --info-border-strong: #93c5fd;
+  --success-text-alt: #047857;
+  --success-text-deep: #166534;
+  --success-bg-alt: #dcfce7;
+  --success-bg-faint: #f0fdf4;
+  --success-border-strong: #86efac;
+  --warning-bg-soft: #fef3c7;
+  --warning-border-strong: #fcd34d;
+  --indigo-bg: #e0e7ff;
+  --indigo-text: #3730a3;
+  --violet-bg-subtle: #f5f3ff;
+  --violet-border: #c4b5fd;
+  --shadow-color: rgba(15, 23, 42, 0.08);
+}
+
+[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #0b1220;
+  --surface: #131c2e;
+  --surface-muted: #1b2538;
+  --bg-subtle: #172133;
+  --border: #26324a;
+  --border-strong: #334155;
+  --text: #f1f5f9;
+  --text-body: #e2e8f0;
+  --text-strong: #cbd5e1;
+  --text-secondary: #b6c2d4;
+  --text-muted: #94a3b8;
+  --text-faint: #64748b;
+  --inverse-bg: #334155;
+  --success-bg: rgba(16, 185, 129, 0.16);
+  --success-bg-subtle: rgba(16, 185, 129, 0.08);
+  --success-border: rgba(16, 185, 129, 0.35);
+  --success-text: #6ee7b7;
+  --danger-bg: rgba(239, 68, 68, 0.16);
+  --danger-bg-subtle: rgba(239, 68, 68, 0.08);
+  --danger-border: rgba(239, 68, 68, 0.35);
+  --danger-text: #fca5a5;
+  --warning-bg: rgba(245, 158, 11, 0.18);
+  --warning-bg-subtle: rgba(245, 158, 11, 0.08);
+  --warning-border: rgba(245, 158, 11, 0.35);
+  --warning-text: #fcd34d;
+  --info-bg: rgba(59, 130, 246, 0.18);
+  --info-bg-subtle: rgba(59, 130, 246, 0.08);
+  --info-border: rgba(59, 130, 246, 0.35);
+  --info-text: #93c5fd;
+  --info-border-strong: rgba(59, 130, 246, 0.5);
+  --success-text-alt: #34d399;
+  --success-text-deep: #86efac;
+  --success-bg-alt: rgba(34, 197, 94, 0.16);
+  --success-bg-faint: rgba(16, 185, 129, 0.06);
+  --success-border-strong: rgba(16, 185, 129, 0.5);
+  --warning-bg-soft: rgba(245, 158, 11, 0.14);
+  --warning-border-strong: rgba(245, 158, 11, 0.5);
+  --indigo-bg: rgba(99, 102, 241, 0.2);
+  --indigo-text: #a5b4fc;
+  --violet-bg-subtle: rgba(139, 92, 246, 0.1);
+  --violet-border: rgba(139, 92, 246, 0.4);
+  --shadow-color: rgba(0, 0, 0, 0.4);
+}
+
 * {
   margin: 0;
   padding: 0;
@@ -176,8 +273,8 @@ export default {
 
 body {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-  background: #f8fafc;
-  color: #1e293b;
+  background: var(--bg);
+  color: var(--text-body);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -189,8 +286,8 @@ body {
 }
 
 .top-nav {
-  background: #ffffff;
-  border-bottom: 1px solid #e2e8f0;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
   box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
   position: sticky;
   top: 0;
@@ -224,16 +321,16 @@ body {
 .logo h1 {
   font-size: 1.375rem;
   font-weight: 700;
-  color: #0f172a;
+  color: var(--text);
   letter-spacing: -0.025em;
 }
 
 .subtitle {
   font-size: 0.813rem;
-  color: #64748b;
+  color: var(--text-muted);
   font-weight: 400;
   padding-left: 0.75rem;
-  border-left: 1px solid #e2e8f0;
+  border-left: 1px solid var(--border);
 }
 
 .nav-tabs {
@@ -243,7 +340,7 @@ body {
 
 .nav-tabs a {
   padding: 0.625rem 1.25rem;
-  color: #64748b;
+  color: var(--text-muted);
   text-decoration: none;
   font-weight: 500;
   font-size: 0.938rem;
@@ -253,13 +350,13 @@ body {
 }
 
 .nav-tabs a:hover {
-  color: #0f172a;
-  background: #f1f5f9;
+  color: var(--text);
+  background: var(--surface-muted);
 }
 
 .nav-tabs a.active {
   color: #2563eb;
-  background: #eff6ff;
+  background: var(--info-bg-subtle);
 }
 
 .nav-tabs a.active::after {
@@ -287,13 +384,13 @@ body {
 .page-header h2 {
   font-size: 1.875rem;
   font-weight: 700;
-  color: #0f172a;
+  color: var(--text);
   margin-bottom: 0.375rem;
   letter-spacing: -0.025em;
 }
 
 .page-header p {
-  color: #64748b;
+  color: var(--text-muted);
   font-size: 0.938rem;
 }
 
@@ -305,20 +402,20 @@ body {
 }
 
 .stat-card {
-  background: white;
+  background: var(--surface);
   padding: 1.25rem;
   border-radius: 10px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--border);
   transition: all 0.2s ease;
 }
 
 .stat-card:hover {
-  border-color: #cbd5e1;
+  border-color: var(--border-strong);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
 }
 
 .stat-label {
-  color: #64748b;
+  color: var(--text-muted);
   font-size: 0.875rem;
   font-weight: 600;
   text-transform: uppercase;
@@ -329,7 +426,7 @@ body {
 .stat-value {
   font-size: 2.25rem;
   font-weight: 700;
-  color: #0f172a;
+  color: var(--text);
   letter-spacing: -0.025em;
 }
 
@@ -350,10 +447,10 @@ body {
 }
 
 .card {
-  background: white;
+  background: var(--surface);
   border-radius: 10px;
   padding: 1.25rem;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--border);
   margin-bottom: 1.25rem;
 }
 
@@ -363,13 +460,13 @@ body {
   align-items: center;
   margin-bottom: 1rem;
   padding-bottom: 0.875rem;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid var(--border);
 }
 
 .card-title {
   font-size: 1.125rem;
   font-weight: 700;
-  color: #0f172a;
+  color: var(--text);
   letter-spacing: -0.025em;
 }
 
@@ -383,16 +480,16 @@ table {
 }
 
 thead {
-  background: #f8fafc;
-  border-top: 1px solid #e2e8f0;
-  border-bottom: 1px solid #e2e8f0;
+  background: var(--bg-subtle);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
 }
 
 th {
   text-align: left;
   padding: 0.5rem 0.75rem;
   font-weight: 600;
-  color: #475569;
+  color: var(--text-secondary);
   font-size: 0.75rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -400,8 +497,8 @@ th {
 
 td {
   padding: 0.5rem 0.75rem;
-  border-top: 1px solid #f1f5f9;
-  color: #334155;
+  border-top: 1px solid var(--surface-muted);
+  color: var(--text-strong);
   font-size: 0.875rem;
 }
 
@@ -410,7 +507,7 @@ tbody tr {
 }
 
 tbody tr:hover {
-  background: #f8fafc;
+  background: var(--bg-subtle);
 }
 
 .badge {
@@ -424,66 +521,66 @@ tbody tr:hover {
 }
 
 .badge.success {
-  background: #d1fae5;
-  color: #065f46;
+  background: var(--success-bg);
+  color: var(--success-text);
 }
 
 .badge.warning {
-  background: #fed7aa;
-  color: #92400e;
+  background: var(--warning-bg);
+  color: var(--warning-text);
 }
 
 .badge.danger {
-  background: #fecaca;
-  color: #991b1b;
+  background: var(--danger-border);
+  color: var(--danger-text);
 }
 
 .badge.info {
-  background: #dbeafe;
-  color: #1e40af;
+  background: var(--info-bg);
+  color: var(--info-text);
 }
 
 .badge.increasing {
-  background: #d1fae5;
-  color: #065f46;
+  background: var(--success-bg);
+  color: var(--success-text);
 }
 
 .badge.decreasing {
-  background: #fecaca;
-  color: #991b1b;
+  background: var(--danger-border);
+  color: var(--danger-text);
 }
 
 .badge.stable {
-  background: #e0e7ff;
-  color: #3730a3;
+  background: var(--indigo-bg);
+  color: var(--indigo-text);
 }
 
 .badge.high {
-  background: #fecaca;
-  color: #991b1b;
+  background: var(--danger-border);
+  color: var(--danger-text);
 }
 
 .badge.medium {
-  background: #fed7aa;
-  color: #92400e;
+  background: var(--warning-bg);
+  color: var(--warning-text);
 }
 
 .badge.low {
-  background: #dbeafe;
-  color: #1e40af;
+  background: var(--info-bg);
+  color: var(--info-text);
 }
 
 .loading {
   text-align: center;
   padding: 3rem;
-  color: #64748b;
+  color: var(--text-muted);
   font-size: 0.938rem;
 }
 
 .error {
-  background: #fef2f2;
-  border: 1px solid #fecaca;
-  color: #991b1b;
+  background: var(--danger-bg-subtle);
+  border: 1px solid var(--danger-border);
+  color: var(--danger-text);
   padding: 1rem;
   border-radius: 8px;
   margin: 1rem 0;
