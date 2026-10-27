@@ -6,6 +6,9 @@ export default {
     orders: 'Orders',
     finance: 'Finance',
     demandForecast: 'Demand Forecast',
+    restocking: 'Restocking',
+    backlog: 'Backlog',
+    reports: 'Reports',
     companyName: 'Catalyst Components',
     subtitle: 'Inventory Management System'
   },
@@ -112,8 +115,14 @@ export default {
     onTimeDelivery: 'On-Time Delivery',
     itemsCount: '{count} items',
     quantity: 'Qty',
+    submittedOrders: 'Submitted Orders',
+    noSubmittedOrders: 'No submitted restock orders yet.',
+    submittedOrdersError: 'Failed to load submitted orders',
+    loadError: 'Failed to load orders',
+    leadTimeValue: '{days} days',
     table: {
       orderNumber: 'Order Number',
+      leadTime: 'Lead Time',
       orderId: 'Order ID',
       orderDate: 'Order Date',
       date: 'Date',
@@ -188,6 +197,42 @@ export default {
     }
   },
 
+  // Restocking
+  restocking: {
+    title: 'Restocking',
+    description: 'Plan restock orders from demand forecasts within your budget',
+    budget: 'Budget',
+    budgetLabel: 'Restocking Budget',
+    budgetHint: 'Adjust the budget to update recommendations. Items with the largest forecasted demand growth are prioritized.',
+    recommendedTotal: 'Recommended Total',
+    remainingBudget: 'Remaining Budget',
+    itemCount: 'Items',
+    recommendations: 'Recommended Items',
+    updating: 'Updating...',
+    noItems: 'No items fit within the current budget. Increase the budget to see recommendations.',
+    noCandidates: 'No items currently require restocking.',
+    placeOrder: 'Place Order',
+    submitting: 'Submitting...',
+    orderSuccess: 'Order {orderNumber} has been submitted.',
+    viewOrders: 'View in Orders',
+    loadError: 'Failed to load restocking recommendations',
+    orderError: 'Failed to place the order. Please try again.',
+    partial: 'Partial',
+    partialNote: 'Partial: the remaining budget only covers part of the recommended quantity for this item. Shown as ordered / recommended.',
+    orderPlacedHint: 'Adjust the budget to prepare another order.',
+    leadTimeValue: '{days} days',
+    table: {
+      sku: 'SKU',
+      itemName: 'Item Name',
+      trend: 'Trend',
+      demand: 'Demand (Current / Forecast)',
+      quantity: 'Order Qty',
+      unitCost: 'Unit Cost',
+      subtotal: 'Subtotal',
+      leadTime: 'Lead Time'
+    }
+  },
+
   // Filters
   filters: {
     timePeriod: 'Time Period',
@@ -206,7 +251,8 @@ export default {
     backordered: 'Backordered',
     inStock: 'In Stock',
     lowStock: 'Low Stock',
-    adequate: 'Adequate'
+    adequate: 'Adequate',
+    submitted: 'Submitted'
   },
 
   // Trends
@@ -274,6 +320,37 @@ export default {
     december: 'December'
   },
 
+  // Reports
+  reports: {
+    title: 'Performance Reports',
+    description: 'View quarterly performance metrics and monthly trends',
+    quarterlyPerformance: 'Quarterly Performance',
+    monthlyRevenueTrend: 'Monthly Revenue Trend',
+    monthOverMonth: 'Month-over-Month Analysis',
+    quarterLabel: 'Q{quarter} {year}',
+    notAvailable: 'N/A',
+    noData: 'No orders match the selected filters',
+    loadError: 'Failed to load reports',
+    table: {
+      quarter: 'Quarter',
+      totalOrders: 'Total Orders',
+      totalRevenue: 'Total Revenue',
+      avgOrderValue: 'Avg Order Value',
+      fulfillmentRate: 'Fulfillment Rate',
+      month: 'Month',
+      orders: 'Orders',
+      revenue: 'Revenue',
+      change: 'Change',
+      growthRate: 'Growth Rate'
+    },
+    stats: {
+      totalRevenue: 'Total Revenue',
+      avgMonthlyRevenue: 'Avg Monthly Revenue',
+      totalOrders: 'Total Orders',
+      bestQuarter: 'Best Performing Quarter'
+    }
+  },
+
   // Profile Menu
   profile: {
     profileDetails: 'Profile Details',
@@ -302,6 +379,78 @@ export default {
     dueDate: 'Due Date',
     addTask: 'Add Task',
     noTasks: 'No tasks yet. Add your first task above!'
+  },
+
+  // Purchase Orders
+  purchaseOrder: {
+    createButton: 'Create PO',
+    viewButton: 'View PO',
+    actions: 'Actions',
+    createTitle: 'Create Purchase Order',
+    viewTitle: 'Purchase Order Details',
+    orderId: 'Order ID',
+    shortage: 'Shortage',
+    units: 'units',
+    supplierName: 'Supplier Name',
+    supplierPlaceholder: 'Enter supplier name...',
+    quantity: 'Quantity',
+    unitCost: 'Unit Cost',
+    unitCostUsd: 'Unit Cost (USD)',
+    expectedDelivery: 'Expected Delivery',
+    notes: 'Notes',
+    notesPlaceholder: 'Optional notes for this order...',
+    noNotes: 'No notes',
+    totalCost: 'Total Cost',
+    poId: 'PO Number',
+    status: 'Status',
+    createdDate: 'Created Date',
+    submit: 'Create Purchase Order',
+    submitting: 'Creating...',
+    statuses: {
+      pending: 'Pending',
+      ordered: 'Ordered',
+      shipped: 'Shipped',
+      received: 'Received',
+      delivered: 'Delivered',
+      cancelled: 'Cancelled'
+    },
+    errors: {
+      supplierRequired: 'Supplier name is required.',
+      quantityInvalid: 'Quantity must be a whole number of at least 1.',
+      unitCostInvalid: 'Unit cost must be greater than 0.',
+      deliveryRequired: 'Expected delivery date is required.',
+      deliveryInvalid: 'Enter a valid date.',
+      deliveryPast: 'Expected delivery date cannot be in the past.',
+      createFailed: 'Failed to create purchase order',
+      loadFailed: 'Failed to load purchase order.',
+      notFound: 'No purchase order was found for this backlog item.'
+    }
+  },
+
+  // Backlog
+  backlog: {
+    title: 'Backlog Management',
+    description: 'Track and resolve inventory shortages',
+    loading: 'Loading backlog...',
+    loadError: 'Failed to load backlog: {message}',
+    highPriority: 'High Priority',
+    mediumPriority: 'Medium Priority',
+    lowPriority: 'Low Priority',
+    totalItems: 'Total Backlog Items',
+    items: 'Backlog Items',
+    noItems: 'No backlog items - all orders can be fulfilled!',
+    unitsShort: '{count} units short',
+    daysCount: '{count} days',
+    table: {
+      orderId: 'Order ID',
+      sku: 'SKU',
+      itemName: 'Item Name',
+      quantityNeeded: 'Quantity Needed',
+      quantityAvailable: 'Quantity Available',
+      shortage: 'Shortage',
+      daysDelayed: 'Days Delayed',
+      priority: 'Priority'
+    }
   },
 
   // Language
