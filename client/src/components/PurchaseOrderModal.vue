@@ -227,6 +227,9 @@ export default {
     const purchaseOrder = ref(null)
     const loading = ref(false)
     const loadError = ref(null)
+    // Incremented on every (re)open/retarget so a late response for a previously opened
+    // backlog item can't overwrite the PO shown for the item that is open now
+    let loadSeq = 0
 
     const todayIso = computed(() => toLocalIsoDate(new Date()))
 
@@ -336,10 +339,12 @@ export default {
 
     const loadPurchaseOrder = async () => {
       if (!props.backlogItem) return
+      const seq = ++loadSeq
       // Reuse the PO already attached to the backlog item (e.g. right after creation)
       if (props.backlogItem.purchase_order) {
         purchaseOrder.value = props.backlogItem.purchase_order
         loadError.value = null
+        loading.value = false
         return
       }
 
@@ -347,14 +352,17 @@ export default {
         loading.value = true
         loadError.value = null
         purchaseOrder.value = null
-        purchaseOrder.value = await api.getPurchaseOrderByBacklogItem(props.backlogItem.id)
+        const po = await api.getPurchaseOrderByBacklogItem(props.backlogItem.id)
+        if (seq !== loadSeq) return
+        purchaseOrder.value = po
       } catch (err) {
+        if (seq !== loadSeq) return
         console.error('Failed to load purchase order:', err)
         loadError.value = err?.response?.status === 404
           ? t('purchaseOrder.errors.notFound')
           : t('purchaseOrder.errors.loadFailed')
       } finally {
-        loading.value = false
+        if (seq === loadSeq) loading.value = false
       }
     }
 
@@ -362,7 +370,12 @@ export default {
     watch(
       () => [props.isOpen, props.backlogItem, props.mode],
       ([open]) => {
-        if (!open || !props.backlogItem) return
+        if (!open || !props.backlogItem) {
+          // Invalidate any in-flight view-mode request when the modal closes
+          loadSeq++
+          return
+        }
+        if (props.mode === 'create') loadSeq++
         if (props.mode === 'create') {
           resetForm()
         } else {

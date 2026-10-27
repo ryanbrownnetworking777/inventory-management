@@ -217,6 +217,9 @@ export default {
     viewOrders: '注文一覧で確認',
     loadError: '補充推奨の読み込みに失敗しました',
     orderError: '発注に失敗しました。もう一度お試しください。',
+    partial: '一部',
+    partialNote: '一部: 残りの予算では推奨数量の一部のみ発注できる品目です。「発注数量 / 推奨数量」の形式で表示しています。',
+    orderPlacedHint: '別の注文を作成するには、予算を調整してください。',
     leadTimeValue: '{days}日',
     table: {
       sku: 'SKU',

@@ -217,6 +217,9 @@ export default {
     viewOrders: 'View in Orders',
     loadError: 'Failed to load restocking recommendations',
     orderError: 'Failed to place the order. Please try again.',
+    partial: 'Partial',
+    partialNote: 'Partial: the remaining budget only covers part of the recommended quantity for this item. Shown as ordered / recommended.',
+    orderPlacedHint: 'Adjust the budget to prepare another order.',
     leadTimeValue: '{days} days',
     table: {
       sku: 'SKU',

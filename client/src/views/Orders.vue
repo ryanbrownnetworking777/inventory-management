@@ -57,12 +57,12 @@
                     <div class="items-dropdown">
                       <div v-for="item in order.items" :key="item.item_sku" class="item-entry">
                         <span class="item-name">{{ translateProductName(item.item_name) }}</span>
-                        <span class="item-meta">{{ t('orders.quantity') }}: {{ item.quantity }} @ {{ formatSubmittedMoney(item.unit_cost, 2) }}</span>
+                        <span class="item-meta">{{ t('orders.quantity') }}: {{ item.quantity }} @ {{ formatMoney(item.unit_cost, 2) }}</span>
                       </div>
                     </div>
                   </details>
                 </td>
-                <td class="col-value"><strong>{{ formatSubmittedMoney(order.total_value) }}</strong></td>
+                <td class="col-value"><strong>{{ formatMoney(order.total_value) }}</strong></td>
                 <td class="col-date">{{ formatSubmittedDate(order.order_date) }}</td>
                 <td class="col-date">{{ formatSubmittedDate(order.expected_delivery) }}</td>
                 <td class="col-lead-time">{{ t('orders.leadTimeValue', { days: order.lead_time_days }) }}</td>
@@ -106,7 +106,7 @@
                     <div class="items-dropdown">
                       <div v-for="(item, idx) in order.items" :key="idx" class="item-entry">
                         <span class="item-name">{{ translateProductName(item.name) }}</span>
-                        <span class="item-meta">{{ t('orders.quantity') }}: {{ item.quantity }} @ {{ currencySymbol }}{{ item.unit_price }}</span>
+                        <span class="item-meta">{{ t('orders.quantity') }}: {{ item.quantity }} @ {{ formatMoney(item.unit_price, 2) }}</span>
                       </div>
                     </div>
                   </details>
@@ -118,7 +118,7 @@
                 </td>
                 <td class="col-date">{{ formatDate(order.order_date) }}</td>
                 <td class="col-date">{{ formatDate(order.expected_delivery) }}</td>
-                <td class="col-value"><strong>{{ currencySymbol }}{{ order.total_value.toLocaleString() }}</strong></td>
+                <td class="col-value"><strong>{{ formatMoney(order.total_value) }}</strong></td>
               </tr>
             </tbody>
           </table>
@@ -129,7 +129,7 @@
 </template>
 
 <script>
-import { ref, onMounted, watch, computed } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import { api } from '../api'
 import { useFilters } from '../composables/useFilters'
 import { useI18n } from '../composables/useI18n'
@@ -140,9 +140,6 @@ export default {
   setup() {
     const { t, currentCurrency, translateProductName, translateCustomerName } = useI18n()
 
-    const currencySymbol = computed(() => {
-      return currentCurrency.value === 'JPY' ? '¥' : '$'
-    })
     const loading = ref(true)
     const error = ref(null)
     const orders = ref([])
@@ -162,21 +159,7 @@ export default {
       try {
         loading.value = true
         const filters = getCurrentFilters()
-        // Restock orders load in parallel; their failure is caught here so it never breaks the main orders list
-        const [fetchedOrders, fetchedSubmitted] = await Promise.all([
-          api.getOrders(filters),
-          api.getRestockOrders().catch(err => {
-            console.error('Failed to load submitted restock orders:', err)
-            return null
-          })
-        ])
-
-        if (fetchedSubmitted) {
-          submittedOrders.value = fetchedSubmitted
-          submittedOrdersError.value = null
-        } else {
-          submittedOrdersError.value = t('orders.submittedOrdersError')
-        }
+        const fetchedOrders = await api.getOrders(filters)
 
         // Sort orders by order_date (earliest first)
         orders.value = fetchedOrders.sort((a, b) => {
@@ -188,6 +171,18 @@ export default {
         error.value = 'Failed to load orders: ' + err.message
       } finally {
         loading.value = false
+      }
+    }
+
+    // Submitted restock orders are not affected by the filters, so they load once on mount
+    // (call loadSubmittedOrders again to refresh). Errors are kept separate so they never break the main list.
+    const loadSubmittedOrders = async () => {
+      try {
+        submittedOrders.value = await api.getRestockOrders()
+        submittedOrdersError.value = null
+      } catch (err) {
+        console.error('Failed to load submitted restock orders:', err)
+        submittedOrdersError.value = t('orders.submittedOrdersError')
       }
     }
 
@@ -220,8 +215,8 @@ export default {
       })
     }
 
-    // Restock order amounts are stored in USD; convert for the active currency like the shared currency util does
-    const formatSubmittedMoney = (amount, decimals = 0) => {
+    // All order amounts are stored in USD; convert for the active currency via the shared currency util
+    const formatMoney = (amount, decimals = 0) => {
       return formatCurrencyWithDecimals(amount || 0, currentCurrency.value, decimals)
     }
 
@@ -231,7 +226,10 @@ export default {
       return formatDate(dateString)
     }
 
-    onMounted(loadOrders)
+    onMounted(() => {
+      loadOrders()
+      loadSubmittedOrders()
+    })
 
     return {
       t,
@@ -240,12 +238,12 @@ export default {
       orders,
       submittedOrders,
       submittedOrdersError,
-      formatSubmittedMoney,
+      formatMoney,
+      loadSubmittedOrders,
       formatSubmittedDate,
       getOrdersByStatus,
       getOrderStatusClass,
       formatDate,
-      currencySymbol,
       translateProductName,
       translateCustomerName
     }

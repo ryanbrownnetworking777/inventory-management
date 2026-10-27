@@ -112,3 +112,56 @@ class TestRestockOrders:
         """An order with no items is invalid."""
         response = client.post("/api/restocking/orders", json={"items": []})
         assert response.status_code == 400
+
+
+class TestRestockPriorityAndValidation:
+    """Priority-first partial fills, default budget, and server-side order validation."""
+
+    def test_default_budget_when_omitted(self, client):
+        """Omitting budget returns half of max_budget rounded down to $50, with items for it."""
+        data = client.get("/api/restocking/recommendations").json()
+        assert data["budget"] == (data["max_budget"] / 2) // 50 * 50
+        assert data["items"]
+        assert data["total_cost"] <= data["budget"]
+
+    def test_top_priority_item_is_partially_filled_not_skipped(self, client):
+        """A budget below the top item's full cost buys as many units of it as possible."""
+        full = client.get("/api/restocking/recommendations?budget=1000000").json()["items"]
+        top = full[0]
+        budget = top["subtotal"] - 1
+        data = client.get(f"/api/restocking/recommendations?budget={budget}").json()
+
+        first = data["items"][0]
+        assert first["item_sku"] == top["item_sku"]
+        assert first["partial"] is True
+        assert 0 < first["quantity"] < first["recommended_quantity"]
+        assert data["total_cost"] <= budget
+
+    def test_subtotals_are_exact_to_the_cent(self, client):
+        data = client.get("/api/restocking/recommendations?budget=1000000").json()
+        for item in data["items"]:
+            assert item["subtotal"] == pytest.approx(item["quantity"] * item["unit_cost"], abs=0.001)
+            assert round(item["subtotal"], 2) == item["subtotal"]
+
+    def test_order_uses_server_prices_not_client_values(self, client):
+        """Client-supplied unit cost, name and lead time are ignored."""
+        demand = {d["item_sku"]: d for d in client.get("/api/demand").json()}
+        response = client.post("/api/restocking/orders", json={"items": [
+            {"item_sku": "WDG-001", "quantity": 10, "unit_cost": 0.01, "lead_time_days": -3, "item_name": "Fake"},
+        ]})
+        assert response.status_code == 201
+        order = response.json()
+        item = order["items"][0]
+        assert item["unit_cost"] == demand["WDG-001"]["unit_cost"]
+        assert item["item_name"] == demand["WDG-001"]["item_name"]
+        assert order["lead_time_days"] == demand["WDG-001"]["lead_time_days"]
+        assert order["total_value"] == pytest.approx(10 * demand["WDG-001"]["unit_cost"])
+
+    @pytest.mark.parametrize("items, status", [
+        ([{"item_sku": "WDG-001", "quantity": -5}], 422),
+        ([{"item_sku": "WDG-001", "quantity": 0}], 422),
+        ([{"item_sku": "NOPE-999", "quantity": 1}], 400),
+        ([{"item_sku": "WDG-001", "quantity": 1}, {"item_sku": "WDG-001", "quantity": 2}], 400),
+    ])
+    def test_invalid_order_lines_rejected(self, client, items, status):
+        assert client.post("/api/restocking/orders", json={"items": items}).status_code == status

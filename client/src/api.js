@@ -104,9 +104,12 @@ export const api = {
     return response.data
   },
 
-  async getRestockRecommendations(budget = 0) {
+  // budget is optional: when omitted the server picks a default and returns it in `budget`
+  async getRestockRecommendations(budget) {
     const params = new URLSearchParams()
-    params.append('budget', budget)
+    if (budget !== undefined && budget !== null) {
+      params.append('budget', budget)
+    }
 
     const response = await axios.get(`${API_BASE_URL}/restocking/recommendations?${params.toString()}`)
     return response.data

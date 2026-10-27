@@ -38,11 +38,11 @@
         </div>
         <div class="stat-card info">
           <div class="stat-label">{{ t('restocking.recommendedTotal') }}</div>
-          <div class="stat-value">{{ formatMoney(totalCost) }}</div>
+          <div class="stat-value">{{ formatMoneyExact(totalCost) }}</div>
         </div>
         <div class="stat-card success">
           <div class="stat-label">{{ t('restocking.remainingBudget') }}</div>
-          <div class="stat-value">{{ formatMoney(remainingBudget) }}</div>
+          <div class="stat-value">{{ formatMoneyExact(remainingBudget) }}</div>
         </div>
         <div class="stat-card">
           <div class="stat-label">{{ t('restocking.itemCount') }}</div>
@@ -53,7 +53,10 @@
       <div v-if="error" class="error">{{ error }}</div>
 
       <div v-if="orderResult" class="success-message">
-        <span>{{ t('restocking.orderSuccess', { orderNumber: orderResult.order_number }) }}</span>
+        <span>
+          {{ t('restocking.orderSuccess', { orderNumber: orderResult.order_number }) }}
+          {{ t('restocking.orderPlacedHint') }}
+        </span>
         <router-link to="/orders" class="success-link">{{ t('restocking.viewOrders') }}</router-link>
       </div>
       <div v-if="orderError" class="error">{{ orderError }}</div>
@@ -103,13 +106,18 @@
                   <span class="demand-arrow">→</span>
                   <strong>{{ item.forecasted_demand.toLocaleString() }}</strong>
                 </td>
-                <td class="text-right"><strong>{{ item.quantity.toLocaleString() }}</strong></td>
+                <td class="text-right">
+                  <span v-if="item.partial" class="badge warning partial-badge">{{ t('restocking.partial') }}</span>
+                  <strong>{{ item.quantity.toLocaleString() }}</strong>
+                  <span v-if="item.partial" class="qty-recommended"> / {{ item.recommended_quantity.toLocaleString() }}</span>
+                </td>
                 <td class="text-right">{{ formatUnitCost(item.unit_cost) }}</td>
-                <td class="text-right"><strong>{{ formatMoney(item.subtotal) }}</strong></td>
+                <td class="text-right"><strong>{{ formatMoneyExact(item.subtotal) }}</strong></td>
                 <td class="text-right">{{ t('restocking.leadTimeValue', { days: item.lead_time_days }) }}</td>
               </tr>
             </tbody>
           </table>
+          <p v-if="hasPartial" class="partial-note">{{ t('restocking.partialNote') }}</p>
         </div>
       </div>
     </div>
@@ -143,6 +151,12 @@ export default {
     const orderResult = ref(null)
     const orderError = ref(null)
 
+    // True from the moment the slider moves until the response for the CURRENT budget arrives,
+    // so the user can never order a list computed for a previous budget
+    const stale = ref(false)
+    // Set after a successful order; cleared only when the budget changes, preventing duplicate orders
+    const orderPlaced = ref(false)
+
     let debounceTimer = null
     // Incremented per request so a slow, stale response can't overwrite a newer one
     let requestSeq = 0
@@ -155,10 +169,20 @@ export default {
     // Round the slider max up to a whole step so the full candidate set remains reachable
     const sliderMax = computed(() => Math.ceil(maxBudget.value / BUDGET_STEP) * BUDGET_STEP)
 
-    const canPlaceOrder = computed(() => items.value.length > 0 && !submitting.value && !recalculating.value)
+    const hasPartial = computed(() => items.value.some(item => item.partial))
+
+    const canPlaceOrder = computed(() =>
+      items.value.length > 0 &&
+      !submitting.value &&
+      !recalculating.value &&
+      !stale.value &&
+      !orderPlaced.value
+    )
 
     const formatMoney = (value) => formatCurrency(value || 0, currentCurrency.value)
-    const formatUnitCost = (value) => formatCurrencyWithDecimals(value || 0, currentCurrency.value, 2)
+    // Subtotals/totals are exact to the cent, so show 2 decimals (JPY shows whole yen)
+    const formatMoneyExact = (value) => formatCurrencyWithDecimals(value || 0, currentCurrency.value, 2)
+    const formatUnitCost = formatMoneyExact
 
     const loadRecommendations = async () => {
       const seq = ++requestSeq
@@ -169,6 +193,8 @@ export default {
         recommendation.value = data
         maxBudget.value = data.max_budget
         error.value = null
+        // Only the latest request (matching the current slider value) clears the stale flag
+        stale.value = false
       } catch (err) {
         if (seq !== requestSeq) return
         error.value = `${t('restocking.loadError')}: ${err.message}`
@@ -179,6 +205,9 @@ export default {
     }
 
     const scheduleRecommendations = () => {
+      // Disable ordering immediately (before the debounce fires) until fresh results arrive
+      stale.value = true
+      orderPlaced.value = false
       // A previous order confirmation no longer matches the list once the budget changes
       orderResult.value = null
       orderError.value = null
@@ -190,12 +219,15 @@ export default {
       try {
         loading.value = true
         error.value = null
-        // A zero budget returns no items but reports max_budget, which sizes the slider
-        const probe = await api.getRestockRecommendations(0)
-        maxBudget.value = probe.max_budget
-        budget.value = Math.round((probe.max_budget * 0.5) / BUDGET_STEP) * BUDGET_STEP
-        await loadRecommendations()
-        initialized.value = !error.value
+        // Omitting the budget lets the server choose a default; it echoes that value back in `budget`
+        const seq = ++requestSeq
+        const data = await api.getRestockRecommendations()
+        if (seq !== requestSeq) return
+        recommendation.value = data
+        maxBudget.value = data.max_budget
+        budget.value = data.budget
+        stale.value = false
+        initialized.value = true
       } catch (err) {
         error.value = `${t('restocking.loadError')}: ${err.message}`
         console.error('Failed to initialize restocking:', err)
@@ -205,21 +237,21 @@ export default {
     }
 
     const placeOrder = async () => {
+      // canPlaceOrder includes !submitting, and submitting is set synchronously below, so double-clicks are ignored
       if (!canPlaceOrder.value) return
       try {
         submitting.value = true
         orderResult.value = null
         orderError.value = null
         const payload = {
+          // Server looks up name, unit cost, and lead time itself
           items: items.value.map(item => ({
             item_sku: item.item_sku,
-            item_name: item.item_name,
-            quantity: item.quantity,
-            unit_cost: item.unit_cost,
-            lead_time_days: item.lead_time_days
+            quantity: item.quantity
           }))
         }
         orderResult.value = await api.createRestockOrder(payload)
+        orderPlaced.value = true
       } catch (err) {
         orderError.value = t('restocking.orderError')
         console.error('Failed to place restock order:', err)
@@ -247,11 +279,13 @@ export default {
       items,
       totalCost,
       remainingBudget,
+      hasPartial,
       submitting,
       orderResult,
       orderError,
       canPlaceOrder,
       formatMoney,
+      formatMoneyExact,
       formatUnitCost,
       scheduleRecommendations,
       placeOrder,
@@ -362,5 +396,21 @@ export default {
 
 .text-right {
   text-align: right;
+}
+
+.partial-badge {
+  margin-right: 0.5rem;
+  padding: 0.125rem 0.5rem;
+  font-size: 0.688rem;
+}
+
+.qty-recommended {
+  color: #64748b;
+}
+
+.partial-note {
+  margin-top: 0.75rem;
+  font-size: 0.813rem;
+  color: #64748b;
 }
 </style>

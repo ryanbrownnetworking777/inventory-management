@@ -142,6 +142,8 @@ class TestPurchaseOrders:
         {"quantity": 0},
         {"unit_cost": -1},
         {"expected_delivery_date": "soon"},
+        {"expected_delivery_date": "2026-01-01garbage"},
+        {"expected_delivery_date": "2020-01-01"},
     ])
     def test_invalid_purchase_order_rejected(self, client, overrides):
         assert client.post("/api/purchase-orders", json=self._payload(**overrides)).status_code == 400
