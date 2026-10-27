@@ -466,7 +466,7 @@ export default {
 }
 
 .modal-container {
-  background: white;
+  background: var(--surface);
   border-radius: 12px;
   box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
   max-width: 640px;
@@ -482,20 +482,20 @@ export default {
   align-items: center;
   justify-content: space-between;
   padding: 1.5rem;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid var(--border);
 }
 
 .modal-title {
   font-size: 1.25rem;
   font-weight: 700;
-  color: #0f172a;
+  color: var(--text);
   letter-spacing: -0.025em;
 }
 
 .close-button {
   background: none;
   border: none;
-  color: #64748b;
+  color: var(--text-muted);
   cursor: pointer;
   padding: 0.5rem;
   display: flex;
@@ -506,8 +506,8 @@ export default {
 }
 
 .close-button:hover {
-  background: #f1f5f9;
-  color: #0f172a;
+  background: var(--surface-muted);
+  color: var(--text);
 }
 
 .modal-body {
@@ -523,7 +523,7 @@ export default {
   gap: 1rem;
   padding-bottom: 1.25rem;
   margin-bottom: 1.5rem;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid var(--border);
 }
 
 .item-summary-main {
@@ -533,7 +533,7 @@ export default {
 .item-name {
   font-size: 1.125rem;
   font-weight: 700;
-  color: #0f172a;
+  color: var(--text);
   margin: 0 0 0.375rem 0;
 }
 
@@ -542,7 +542,7 @@ export default {
   flex-wrap: wrap;
   gap: 1rem;
   font-size: 0.813rem;
-  color: #64748b;
+  color: var(--text-muted);
 }
 
 .mono {
@@ -553,8 +553,8 @@ export default {
   flex-shrink: 0;
   padding: 0.375rem 0.75rem;
   border-radius: 6px;
-  background: #fef2f2;
-  border: 1px solid #fecaca;
+  background: var(--danger-bg-subtle);
+  border: 1px solid var(--danger-border);
   color: #dc2626;
   font-size: 0.813rem;
   font-weight: 600;
@@ -581,7 +581,7 @@ export default {
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: #64748b;
+  color: var(--text-muted);
 }
 
 .required {
@@ -591,12 +591,12 @@ export default {
 .form-field input,
 .form-field textarea {
   padding: 0.625rem 0.75rem;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--border);
   border-radius: 8px;
   font-size: 0.938rem;
-  color: #0f172a;
+  color: var(--text);
   font-family: inherit;
-  background: white;
+  background: var(--surface);
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
@@ -617,8 +617,8 @@ export default {
 
 .form-field input:disabled,
 .form-field textarea:disabled {
-  background: #f8fafc;
-  color: #64748b;
+  background: var(--bg-subtle);
+  color: var(--text-muted);
 }
 
 .field-error {
@@ -632,8 +632,8 @@ export default {
   justify-content: space-between;
   margin-top: 1.5rem;
   padding: 1rem 1.25rem;
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
+  background: var(--bg-subtle);
+  border: 1px solid var(--border);
   border-radius: 10px;
 }
 
@@ -642,29 +642,29 @@ export default {
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: #64748b;
+  color: var(--text-muted);
 }
 
 .total-value {
   font-size: 1.5rem;
   font-weight: 700;
-  color: #0f172a;
+  color: var(--text);
 }
 
 .error-banner {
   margin-top: 1rem;
   padding: 0.75rem 1rem;
-  background: #fef2f2;
-  border: 1px solid #fecaca;
+  background: var(--danger-bg-subtle);
+  border: 1px solid var(--danger-border);
   border-radius: 8px;
-  color: #991b1b;
+  color: var(--danger-text);
   font-size: 0.875rem;
 }
 
 .state-message {
   padding: 2rem;
   text-align: center;
-  color: #64748b;
+  color: var(--text-muted);
 }
 
 .info-grid {
@@ -688,12 +688,12 @@ export default {
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: #64748b;
+  color: var(--text-muted);
 }
 
 .info-value {
   font-size: 0.938rem;
-  color: #0f172a;
+  color: var(--text);
   font-weight: 500;
 }
 
@@ -707,7 +707,7 @@ export default {
 
 .info-value.notes {
   white-space: pre-wrap;
-  color: #334155;
+  color: var(--text-strong);
 }
 
 .badge {
@@ -719,28 +719,28 @@ export default {
 }
 
 .badge.success {
-  background: #d1fae5;
-  color: #065f46;
+  background: var(--success-bg);
+  color: var(--success-text);
 }
 
 .badge.info {
-  background: #dbeafe;
-  color: #1e40af;
+  background: var(--info-bg);
+  color: var(--info-text);
 }
 
 .badge.warning {
-  background: #fef3c7;
-  color: #92400e;
+  background: var(--warning-bg);
+  color: var(--warning-text);
 }
 
 .badge.danger {
-  background: #fecaca;
-  color: #991b1b;
+  background: var(--danger-bg);
+  color: var(--danger-text);
 }
 
 .modal-footer {
   padding: 1.5rem;
-  border-top: 1px solid #e2e8f0;
+  border-top: 1px solid var(--border);
   display: flex;
   justify-content: flex-end;
   gap: 0.75rem;
@@ -758,19 +758,19 @@ export default {
 }
 
 .btn-secondary {
-  background: #f1f5f9;
-  border: 1px solid #e2e8f0;
-  color: #334155;
+  background: var(--surface-muted);
+  border: 1px solid var(--border);
+  color: var(--text-strong);
 }
 
 .btn-secondary:hover:not(:disabled) {
-  background: #e2e8f0;
-  border-color: #cbd5e1;
+  background: var(--border);
+  border-color: var(--border-strong);
 }
 
 .btn-primary {
-  background: #0f172a;
-  border: 1px solid #0f172a;
+  background: var(--inverse-bg);
+  border: 1px solid var(--inverse-bg);
   color: white;
 }
 

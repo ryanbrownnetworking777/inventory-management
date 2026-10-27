@@ -299,7 +299,7 @@ export default {
 .budget-display {
   font-size: 1.5rem;
   font-weight: 700;
-  color: #0f172a;
+  color: var(--text);
   letter-spacing: -0.025em;
 }
 
@@ -318,20 +318,20 @@ export default {
   justify-content: space-between;
   margin-top: 0.25rem;
   font-size: 0.813rem;
-  color: #64748b;
+  color: var(--text-muted);
 }
 
 .budget-hint {
   margin-top: 0.75rem;
   font-size: 0.875rem;
-  color: #64748b;
+  color: var(--text-muted);
 }
 
 .updating {
   margin-left: 0.5rem;
   font-size: 0.813rem;
   font-weight: 500;
-  color: #64748b;
+  color: var(--text-muted);
 }
 
 .btn-primary {
@@ -353,8 +353,8 @@ export default {
 }
 
 .btn-primary:disabled {
-  background: #cbd5e1;
-  border-color: #cbd5e1;
+  background: var(--border-strong);
+  border-color: var(--border-strong);
   cursor: not-allowed;
 }
 
@@ -363,9 +363,9 @@ export default {
   justify-content: space-between;
   align-items: center;
   gap: 1rem;
-  background: #ecfdf5;
-  border: 1px solid #a7f3d0;
-  color: #065f46;
+  background: var(--success-bg-subtle);
+  border: 1px solid var(--success-border);
+  color: var(--success-text);
   padding: 1rem;
   border-radius: 8px;
   margin: 1rem 0;
@@ -373,25 +373,25 @@ export default {
 }
 
 .success-link {
-  color: #047857;
+  color: var(--success-text);
   font-weight: 600;
   white-space: nowrap;
 }
 
 .success-link:hover {
-  color: #065f46;
+  color: var(--success-text);
 }
 
 .empty-state {
   text-align: center;
   padding: 2rem;
-  color: #64748b;
+  color: var(--text-muted);
   font-size: 0.938rem;
 }
 
 .demand-arrow {
   margin: 0 0.375rem;
-  color: #94a3b8;
+  color: var(--text-faint);
 }
 
 .text-right {
@@ -405,12 +405,12 @@ export default {
 }
 
 .qty-recommended {
-  color: #64748b;
+  color: var(--text-muted);
 }
 
 .partial-note {
   margin-top: 0.75rem;
   font-size: 0.813rem;
-  color: #64748b;
+  color: var(--text-muted);
 }
 </style>
