@@ -4,7 +4,6 @@
     class="theme-toggle"
     :aria-label="label"
     :title="label"
-    :aria-pressed="theme === 'dark'"
     @click="toggleTheme"
   >
     <svg v-if="theme === 'dark'" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
@@ -27,7 +26,7 @@ export default {
     const { theme, toggleTheme } = useTheme()
     const { t } = useI18n()
 
-    // Label describes the action, so screen readers announce what pressing it will do
+    // Label describes the action (no aria-pressed: a toggle's label must not change with its state, per the WAI-ARIA button pattern)
     const label = computed(() => t(theme.value === 'dark' ? 'theme.switchToLight' : 'theme.switchToDark'))
 
     return {

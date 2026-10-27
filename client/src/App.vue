@@ -251,7 +251,7 @@ export default {
   --info-border: rgba(59, 130, 246, 0.35);
   --info-text: #93c5fd;
   --info-border-strong: rgba(59, 130, 246, 0.5);
-  --success-text-alt: #6ee7b7;
+  --success-text-alt: #34d399;
   --success-text-deep: #86efac;
   --success-bg-alt: rgba(34, 197, 94, 0.16);
   --success-bg-faint: rgba(16, 185, 129, 0.06);
