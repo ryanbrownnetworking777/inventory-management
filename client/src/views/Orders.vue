@@ -29,6 +29,56 @@
 
       <div class="card">
         <div class="card-header">
+          <h3 class="card-title">{{ t('orders.submittedOrders') }} ({{ submittedOrders.length }})</h3>
+        </div>
+        <div v-if="submittedOrdersError" class="error">{{ submittedOrdersError }}</div>
+        <div v-else-if="submittedOrders.length === 0" class="empty-state">{{ t('orders.noSubmittedOrders') }}</div>
+        <div v-else class="table-container">
+          <table class="orders-table">
+            <thead>
+              <tr>
+                <th class="col-order-number">{{ t('orders.table.orderNumber') }}</th>
+                <th class="col-items">{{ t('orders.table.items') }}</th>
+                <th class="col-value">{{ t('orders.table.totalValue') }}</th>
+                <th class="col-date">{{ t('orders.table.orderDate') }}</th>
+                <th class="col-date">{{ t('orders.table.expectedDelivery') }}</th>
+                <th class="col-lead-time">{{ t('orders.table.leadTime') }}</th>
+                <th class="col-status">{{ t('orders.table.status') }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="order in submittedOrders" :key="order.id">
+                <td class="col-order-number"><strong>{{ order.order_number }}</strong></td>
+                <td class="col-items">
+                  <details class="items-details">
+                    <summary class="items-summary">
+                      {{ t('orders.itemsCount', { count: order.items.length }) }}
+                    </summary>
+                    <div class="items-dropdown">
+                      <div v-for="item in order.items" :key="item.item_sku" class="item-entry">
+                        <span class="item-name">{{ translateProductName(item.item_name) }}</span>
+                        <span class="item-meta">{{ t('orders.quantity') }}: {{ item.quantity }} @ {{ formatSubmittedMoney(item.unit_cost, 2) }}</span>
+                      </div>
+                    </div>
+                  </details>
+                </td>
+                <td class="col-value"><strong>{{ formatSubmittedMoney(order.total_value) }}</strong></td>
+                <td class="col-date">{{ formatSubmittedDate(order.order_date) }}</td>
+                <td class="col-date">{{ formatSubmittedDate(order.expected_delivery) }}</td>
+                <td class="col-lead-time">{{ t('orders.leadTimeValue', { days: order.lead_time_days }) }}</td>
+                <td class="col-status">
+                  <span :class="['badge', getOrderStatusClass(order.status)]">
+                    {{ t(`status.${order.status.toLowerCase()}`) }}
+                  </span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
           <h3 class="card-title">{{ t('orders.allOrders') }} ({{ orders.length }})</h3>
         </div>
         <div class="table-container">
@@ -83,6 +133,7 @@ import { ref, onMounted, watch, computed } from 'vue'
 import { api } from '../api'
 import { useFilters } from '../composables/useFilters'
 import { useI18n } from '../composables/useI18n'
+import { formatCurrencyWithDecimals } from '../utils/currency'
 
 export default {
   name: 'Orders',
@@ -95,6 +146,8 @@ export default {
     const loading = ref(true)
     const error = ref(null)
     const orders = ref([])
+    const submittedOrders = ref([])
+    const submittedOrdersError = ref(null)
 
     // Use shared filters
     const {
@@ -109,7 +162,21 @@ export default {
       try {
         loading.value = true
         const filters = getCurrentFilters()
-        const fetchedOrders = await api.getOrders(filters)
+        // Restock orders load in parallel; their failure is caught here so it never breaks the main orders list
+        const [fetchedOrders, fetchedSubmitted] = await Promise.all([
+          api.getOrders(filters),
+          api.getRestockOrders().catch(err => {
+            console.error('Failed to load submitted restock orders:', err)
+            return null
+          })
+        ])
+
+        if (fetchedSubmitted) {
+          submittedOrders.value = fetchedSubmitted
+          submittedOrdersError.value = null
+        } else {
+          submittedOrdersError.value = t('orders.submittedOrdersError')
+        }
 
         // Sort orders by order_date (earliest first)
         orders.value = fetchedOrders.sort((a, b) => {
@@ -153,6 +220,17 @@ export default {
       })
     }
 
+    // Restock order amounts are stored in USD; convert for the active currency like the shared currency util does
+    const formatSubmittedMoney = (amount, decimals = 0) => {
+      return formatCurrencyWithDecimals(amount || 0, currentCurrency.value, decimals)
+    }
+
+    const formatSubmittedDate = (dateString) => {
+      const date = new Date(dateString)
+      if (isNaN(date.getTime())) return '-'
+      return formatDate(dateString)
+    }
+
     onMounted(loadOrders)
 
     return {
@@ -160,6 +238,10 @@ export default {
       loading,
       error,
       orders,
+      submittedOrders,
+      submittedOrdersError,
+      formatSubmittedMoney,
+      formatSubmittedDate,
       getOrdersByStatus,
       getOrderStatusClass,
       formatDate,
@@ -201,6 +283,17 @@ export default {
 
 .col-value {
   width: 120px;
+}
+
+.col-lead-time {
+  width: 120px;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 2rem;
+  color: #64748b;
+  font-size: 0.938rem;
 }
 
 /* Items details styling */
