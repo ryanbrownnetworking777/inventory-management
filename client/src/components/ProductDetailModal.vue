@@ -256,7 +256,7 @@ const getStockBadgeClass = (stockLevel) => {
 }
 
 .stock-badge.danger {
-  background: var(--danger-bg);
+  background: var(--danger-border);
   color: var(--danger-text);
 }
 

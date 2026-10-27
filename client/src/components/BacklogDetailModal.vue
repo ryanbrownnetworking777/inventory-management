@@ -239,7 +239,7 @@ const formatDate = (dateString) => {
 }
 
 .priority-badge.high {
-  background: var(--danger-bg);
+  background: var(--danger-border);
   color: var(--danger-text);
 }
 
@@ -272,7 +272,7 @@ const formatDate = (dateString) => {
 }
 
 .summary-card.warning {
-  border-color: var(--warning-border);
+  border-color: var(--warning-bg);
   background: var(--warning-bg-subtle);
 }
 

@@ -729,12 +729,12 @@ export default {
 }
 
 .badge.warning {
-  background: var(--warning-bg);
+  background: var(--warning-bg-soft);
   color: var(--warning-text);
 }
 
 .badge.danger {
-  background: var(--danger-bg);
+  background: var(--danger-border);
   color: var(--danger-text);
 }
 

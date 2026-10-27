@@ -544,7 +544,7 @@ label {
 }
 
 .priority-badge.high {
-  background: var(--danger-bg);
+  background: var(--danger-border);
   color: var(--danger-text);
 }
 
@@ -579,7 +579,7 @@ label {
 }
 
 .status-badge.overdue {
-  background: var(--danger-bg);
+  background: var(--danger-border);
   color: var(--danger-text);
 }
 

@@ -257,22 +257,22 @@ const close = () => {
 }
 
 .cost-item.procurement {
-  border-color: var(--info-border);
+  border-color: var(--info-border-strong);
   background: var(--info-bg-subtle);
 }
 
 .cost-item.operational {
-  border-color: var(--info-border);
-  background: var(--info-bg-subtle);
+  border-color: var(--violet-border);
+  background: var(--violet-bg-subtle);
 }
 
 .cost-item.labor {
-  border-color: var(--success-border);
-  background: var(--success-bg-subtle);
+  border-color: var(--success-border-strong);
+  background: var(--success-bg-faint);
 }
 
 .cost-item.overhead {
-  border-color: var(--warning-border);
+  border-color: var(--warning-border-strong);
   background: var(--warning-bg-subtle);
 }
 

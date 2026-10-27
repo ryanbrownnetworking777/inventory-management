@@ -373,7 +373,7 @@ export default {
 }
 
 .success-link {
-  color: var(--success-text);
+  color: var(--success-text-alt);
   font-weight: 600;
   white-space: nowrap;
 }

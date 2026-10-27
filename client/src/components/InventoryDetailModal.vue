@@ -311,7 +311,7 @@ const getSummaryCardClass = () => {
 }
 
 .stock-badge.danger {
-  background: var(--danger-bg);
+  background: var(--danger-border);
   color: var(--danger-text);
 }
 
@@ -339,7 +339,7 @@ const getSummaryCardClass = () => {
 }
 
 .summary-card.warning-card {
-  border-color: var(--warning-border);
+  border-color: var(--warning-bg);
   background: var(--warning-bg-subtle);
 }
 

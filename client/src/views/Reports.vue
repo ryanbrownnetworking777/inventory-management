@@ -462,12 +462,12 @@ export default {
 }
 
 .badge.success {
-  background: var(--success-bg);
-  color: var(--success-text);
+  background: var(--success-bg-alt);
+  color: var(--success-text-deep);
 }
 
 .badge.warning {
-  background: var(--warning-bg);
+  background: var(--warning-bg-soft);
   color: var(--warning-text);
 }
 
